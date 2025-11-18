@@ -1,0 +1,138 @@
+{# ------------------- table 1 : each line from Sales Order Item -------------------- #}
+<style>
+    thead {display: table-header-group;}
+    
+    /* สำหรับจัดให้ Label และค่าตรงกันและชิดขวา */
+    .summary-table {
+        width: 100%;
+    }
+    
+    .summary-table td:first-child {
+        text-align: right;
+        padding-right: 10px;
+        white-space: nowrap;
+        width: 60%;
+    }
+    
+    .summary-table td:last-child {
+        text-align: right;
+        padding-left: 10px;
+        width: 40%;
+    }
+    
+    .summary-table tr:last-child td {
+        font-weight: bold;
+    }
+    
+    /* สำหรับตาราง Amount ชิดซ้าย */
+    .amount-table {
+        width: 100%;
+    }
+    
+    .amount-table td:first-child {
+        text-align: left;
+        padding-right: 10px;
+        white-space: nowrap;
+        vertical-align: middle;
+    }
+    
+    .amount-table td:last-child {
+        text-align: left;
+        padding-left: 0px;
+        vertical-align: middle;
+    }
+</style>
+
+<table class="table table-bordered table-condensed">
+    <caption>each line from Sales Order Item</caption>
+    <thead class="repeat table_header">
+    <tr>
+        <th>Item No.</th>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+    {% set asumm = [0] %} 
+    {% set ll = [0] %}
+    {% for item in doc.items %}  {# | sort (attribute='reference_name') #}
+        <tr>
+            <td>{{ item.item_code }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ frappe.utils.fmt_money(item.qty,format='Integer') }}</td>
+            <td style="text-align:right">{{ frappe.utils.fmt_money(item.base_rate) }}</td>
+            <td style="text-align:right">{{ frappe.utils.fmt_money(item.base_amount) }}</td>
+        </tr>
+        {% if asumm.append(asumm[-1]  + item.base_amount) %}{% endif %}
+    {% endfor %}
+    <tr>
+        <td></td>
+        <td style="text-align:right"><strong>Total</strong></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:right"><strong>{{ frappe.utils.fmt_money(asumm[-1]) }}</strong></td>
+    </tr>
+</table>
+
+{# below is the summary part of items detail #}
+{% set total_amt    = asumm[-1] %}
+{% set disc_amt     =  0.0 %} {# doc.discount_amt #}
+{% set total_b4_vat = ( total_amt - disc_amt ) %}
+{% set vat_amt = doc.total_taxes_and_charges or (total_b4_vat * 0.07) %}
+{% set grand_amt    = total_b4_vat + vat_amt %}
+
+<div class="row margin-bottom">
+    <div class="col-xs-6">
+        <table>
+            <tr><td>   </td></tr> 
+            <tr><td>   </td></tr> 
+            <tr><td>   </td></tr> 
+            <tr><td>   </td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="row margin-bottom">
+    <div class="col-xs-6">
+        <table class="amount-table">
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>          
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>
+            <tr><td></td><td></td></tr>     
+            <tr><td></td><td></td></tr> 
+            <tr><td></td><td></td></tr> 
+            <tr><td></td><td></td></tr>
+            <tr>
+                <td style="vertical-align: top; line-height: 1.4;"><strong>Amount:</strong></td>
+                <td style="vertical-align: top; line-height: 1.4;">{{ frappe.utils.money_in_thai(grand_amt) }}</td>
+            </tr>
+        </table>
+    </div>
+    <div class="col-xs-6">
+        <table class="summary-table">
+            <tr>
+                <td><strong>The Value:</strong></td>
+                <td>{{ frappe.utils.fmt_money(total_amt) }}</td>
+            </tr>
+            <tr>
+                <td><strong>Discount:</strong></td>
+                <td>{{ frappe.utils.fmt_money(disc_amt) }}</td>
+            </tr>
+            <tr>
+                <td><strong>Total:</strong></td>
+                <td>{{ frappe.utils.fmt_money(total_b4_vat) }}</td>
+            </tr>
+            <tr>
+                <td><strong>VAT 7%:</strong></td>
+                <td>{{ frappe.utils.fmt_money(vat_amt) }}</td>
+            </tr>
+            <tr>
+                <td><strong>Grand Total:</strong></td>
+                <td>{{ frappe.utils.fmt_money(grand_amt) }}</td>
+            </tr>
+        </table>
+    </div>
+</div>

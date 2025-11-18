@@ -1,0 +1,95 @@
+<style>
+  body{ font-family:"TH Sarabun New","TH Sarabun",Arial,sans-serif; font-size:12px; margin:0; padding:10px; line-height:1.3; color:#000; }
+  .layout-table{ width:100%; border-collapse:collapse; margin-bottom:6px; }
+  .layout-table td{ vertical-align:top; padding:3px; }
+
+  .doc-header-right{ text-align:right; }
+  .doc-header-right div{ margin-bottom:2px; }
+  .doc-title{ font-weight:bold; font-size:18px; }
+
+  .draft-status{ text-align:center; color:black; font-weight:bold; font-size:16px; margin:6px 0; }
+
+  .section-header{ font-size:12px; font-weight:bold; margin:6px 0 3px 0; }
+  .address-box{ padding:8px; min-height:90px; font-size:12px; }
+  .party-name{ font-weight:bold; margin-bottom:4px; display:block; }
+</style>
+
+{# 1) ต้อง set customer_group ก่อนใช้งาน #}
+{% set customer_group = frappe.db.get_value('Customer', doc.customer, 'customer_group') or '' %}
+
+<div class="print-heading">
+  <table class="layout-table">
+    <tr>
+      <td style="width:60%;"></td>
+      <td style="width:40%;" class="doc-header-right">
+        <div class="doc-title">
+          {% if customer_group and customer_group.upper() == "FOREIGN" %}
+            Sales Order
+          {% else %}
+            ใบคำสั่งขาย
+          {% endif %}
+        </div>
+        <div>Date: {{ frappe.utils.formatdate(doc.transaction_date, 'dd/MM/yyyy') }}</div>
+        <div>{{ doc.name }}</div>
+      </td>
+    </tr>
+  </table>
+</div>
+
+{%- if doc.docstatus == 0 -%}
+  <div class="draft-status">== DRAFT ==</div>
+{%- endif -%}
+
+{# ===== Macro: render_address_with_branch (เหมือนเดิมที่อัปเดตแล้ว) ===== #}
+{% macro render_address_with_branch(address_text, tax_id=None, customer_group=None) -%}
+  {% set raw = (address_text or '') 
+      | replace('<br />', '\n') | replace('<br/>', '\n') | replace('<br>', '\n') | trim %}
+  {% set lines = raw.split('\n') %}
+  {% set first_line = (lines[0] if lines|length > 0 else '') %}
+  {% set rest_lines = (lines[1:] if lines|length > 1 else []) %}
+
+  {% set code = first_line[:5] if first_line|length >= 5 and first_line[:5].isdigit() else '' %}
+  {% set remainder = (first_line[5:].strip() if code else first_line) %}
+
+  {% set grp = (customer_group or '') | upper %}
+  {% set is_foreign = (grp == 'FOREIGN') %}
+
+  {% if code %}
+    {% if code == '00000' %}
+      {% set branch_label = ('HeadQuarter' if is_foreign else 'สำนักงานใหญ่') %}
+    {% else %}
+      {% set branch_label = (('Branch ' ~ code) if is_foreign else ('สาขาที่ ' ~ code)) %}
+    {% endif %}
+    {{ branch_label }}{% if remainder %} {{ remainder }}{% endif %}<br>
+    {{ rest_lines | join('<br>') | safe }}
+  {% else %}
+    {{ lines | join('<br>') | safe }}
+  {% endif %}
+
+  {% if tax_id %}
+    <br>เลขประจำตัวผู้เสียภาษี {{ tax_id }}
+  {% endif %}
+{%- endmacro %}
+
+<table class="layout-table margin-bottom">
+  <tr>
+    <td style="width:50%;">
+      <div class="section-header">Sold To:</div>
+      <div class="address-box">
+        <span class="party-name">{{ doc.customer_name }}</span>
+        {{ render_address_with_branch(doc.address_display, doc.tax_id, customer_group) }}
+      </div>
+    </td>
+    <td style="width:50%;">
+      <div class="section-header">Ship To:</div>
+      <div class="address-box">
+        <span class="party-name">{{ doc.shipping_address_name or doc.customer_name }}</span>
+        {{ render_address_with_branch(
+            doc.shipping_address or doc.shipping_address_display or doc.address_display,
+            None,
+            customer_group
+        ) }}
+      </div>
+    </td>
+  </tr>
+</table>

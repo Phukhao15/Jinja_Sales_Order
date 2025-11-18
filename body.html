@@ -1,0 +1,20 @@
+{# ------------------- Head 002 -------------------- #}
+<div class="margin-top">
+    <table class="table table-bordered table-condensed" style="width:100%;">
+        <caption><strong> </strong></caption>
+        <tr>
+            <th style="text-align:center; width:15%;">Contact</th>
+            <th style="text-align:center; width:20%;">PO Number</th>
+            <th style="text-align:center; width:15%;">Customer No</th>
+            <th style="text-align:center; width:15%;">Sales Person</th>
+            <th style="text-align:center; width:10%;">Term</th>
+        </tr>
+        <tr>
+            <td style="text-align:center; width:15%;">xx</td>
+            <td style="text-align:center; width:25%;">{{ doc.po_no }}</td>
+            <td style="text-align:center; width:15%;">{{ doc.customer }}</td>
+            <td style="text-align:center; width:15%;">{{ doc.sales_partner }}</td>
+            <td style="text-align:center; width:10%;"><strong>{{ doc.payment_terms_template }}</strong></td>
+        </tr>
+    </table>
+</div>
