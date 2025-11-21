@@ -1,5 +1,13 @@
 <style>
-  body{ font-family:"TH Sarabun New","TH Sarabun",Arial,sans-serif; font-size:12px; margin:0; padding:10px; line-height:1.3; color:#000; }
+  
+  body{ 
+    font-family:"TH Sarabun New","TH Sarabun",Arial,sans-serif; 
+    font-size:12px; 
+    margin:0; 
+    padding:10px; 
+    line-height:1.3; 
+    color:#000; 
+  }
   .layout-table{ width:100%; border-collapse:collapse; margin-bottom:6px; }
   .layout-table td{ vertical-align:top; padding:3px; }
 
@@ -40,7 +48,7 @@
   <div class="draft-status">== DRAFT ==</div>
 {%- endif -%}
 
-{# ===== Macro: render_address_with_branch (เหมือนเดิมที่อัปเดตแล้ว) ===== #}
+{# ===== Macro: render_address_with_branch ===== #}
 {% macro render_address_with_branch(address_text, tax_id=None, customer_group=None) -%}
   {% set raw = (address_text or '') 
       | replace('<br />', '\n') | replace('<br/>', '\n') | replace('<br>', '\n') | trim %}

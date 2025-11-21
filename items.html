@@ -1,0 +1,35 @@
+{# ------------------- Items -------------------- #}
+<style>
+    thead {display: table-header-group;}
+</style>
+
+<table class="table table-bordered table-condensed">
+    <caption>each line from Sales Order Item</caption>
+    <thead class="repeat table_header">
+    <tr>
+        <th>Item No.</th>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Amount</th>
+    </tr>
+    </thead>
+
+    {% for item in doc.items %}
+        <tr>
+            <td>{{ item.item_code }}</td>
+            <td>{{ item.description }}</td>
+            <td>{{ frappe.utils.fmt_money(item.qty, format='Integer') }}</td>
+            <td style="text-align:right">{{ frappe.utils.fmt_money(item.rate) }}</td>
+            <td style="text-align:right">{{ frappe.utils.fmt_money(item.amount) }}</td>
+        </tr>
+    {% endfor %}
+
+    <tr>
+        <td></td>
+        <td style="text-align:right"><strong>Total</strong></td>
+        <td></td>
+        <td></td>
+        <td style="text-align:right"><strong>{{ frappe.utils.fmt_money(doc.total) }}</strong></td>
+    </tr>
+</table>

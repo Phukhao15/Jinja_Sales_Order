@@ -1,0 +1,111 @@
+<style>
+    .summary-table { width: 100%; }
+    .summary-table td:first-child {
+        text-align: right; padding-right: 10px; white-space: nowrap; width: 60%;
+    }
+    .summary-table td:last-child {
+        text-align: right; padding-left: 10px; width: 40%;
+    }
+    .summary-table tr:last-child td { font-weight: bold; }
+    .amount-table { width: 100%; }
+    .amount-table td:first-child {
+        text-align: left; padding-right: 10px; white-space: nowrap; vertical-align: middle;
+    }
+    .amount-table td:last-child {
+        text-align: left; padding-left: 0px; vertical-align: middle;
+    }
+    
+    /* กลุ่ม summary + signature ไว้ด้วยกัน และผลักไปด้านล่างสุด */
+    @media print {
+        .summary-signature-group {
+            page-break-inside: avoid;
+            min-height: calc(100vh - 280px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+        }
+    }
+    
+    @media screen {
+        .summary-signature-group {
+            page-break-inside: avoid;
+        }
+    }
+    
+    .summary-section {
+        page-break-inside: avoid;
+    }
+</style>
+
+{% set total_amt    = doc.total %}
+{% set disc_amt     = doc.discount_amount or 0 %}
+{% set total_b4_vat = doc.net_total %}
+{% set vat_amt      = doc.total_taxes_and_charges %}
+{% set grand_amt    = doc.grand_total %}
+
+<div class="summary-signature-group">
+    <div class="summary-section">
+        <div class="row margin-bottom">
+            <div class="col-xs-6">
+                <table>
+                    <tr><td>   </td></tr>
+                    <tr><td>   </td></tr>
+                    <tr><td>   </td></tr>
+                    <tr><td>   </td></tr>
+                </table>
+            </div>
+        </div>
+
+        <div class="row margin-bottom">
+            <div class="col-xs-6">
+                <table class="amount-table">
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr><td></td><td></td></tr>
+                    <tr>
+                        <td style="vertical-align: top; line-height: 1.4;"><strong>Amount:</strong></td>
+                        <td style="vertical-align: top; line-height: 1.4;">
+                            {% if doc.currency == "THB" %}
+                                {{ frappe.utils.money_in_thai(doc.grand_total) }}
+                            {% else %}
+                                {% set money_text = frappe.utils.money_in_words(doc.grand_total, doc.currency).upper() %}
+                                {% set final_text = money_text.replace(doc.currency, "").replace("-P", "").replace("DOLLARS", "").replace("DOLLAR", "") %}
+                                {{ final_text.strip() }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                </table>
+            </div>
+
+            <div class="col-xs-6">
+                <table class="summary-table">
+                    <tr>
+                        <td><strong>The Value:</strong></td>
+                        <td>{{ frappe.utils.fmt_money(total_amt) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Discount:</strong></td>
+                        <td>{{ frappe.utils.fmt_money(disc_amt) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total:</strong></td>
+                        <td>{{ frappe.utils.fmt_money(total_b4_vat) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VAT 7%:</strong></td>
+                        <td>{{ frappe.utils.fmt_money(vat_amt) }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Grand Total:</strong></td>
+                        <td>{{ frappe.utils.fmt_money(grand_amt) }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+    </div>

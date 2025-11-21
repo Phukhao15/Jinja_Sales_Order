@@ -1,4 +1,9 @@
 {# ------------------- Head 002 -------------------- #}
+{% set w_sa = ["N/A"] %}
+{% for sales in doc.sales_team %}
+    {% if sales.sales_person %} {% if w_sa.append ( sales.sales_person )  %} {% endif %} {% endif %}
+{% endfor %}
+
 <div class="margin-top">
     <table class="table table-bordered table-condensed" style="width:100%;">
         <caption><strong> </strong></caption>
@@ -13,7 +18,7 @@
             <td style="text-align:center; width:15%;">xx</td>
             <td style="text-align:center; width:25%;">{{ doc.po_no }}</td>
             <td style="text-align:center; width:15%;">{{ doc.customer }}</td>
-            <td style="text-align:center; width:15%;">{{ doc.sales_partner }}</td>
+            <td style="text-align:center; width:15%;">{{ w_sa[-1] }}</td>
             <td style="text-align:center; width:10%;"><strong>{{ doc.payment_terms_template }}</strong></td>
         </tr>
     </table>
